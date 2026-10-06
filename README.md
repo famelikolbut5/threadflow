@@ -1,59 +1,50 @@
 # Threadflow
 
-Executable workflow canvas with durable step results, retries and idempotent business effects.
+Обработка входящих заявок с наглядной схемой и историей запусков. Сервис проверяет контакты, определяет категорию, создаёт обращение и ставит уведомление в локальную очередь.
 
-![Interface](docs/preview.png)
+[![Проверки](https://github.com/famelikolbut5/threadflow/actions/workflows/ci.yml/badge.svg)](https://github.com/famelikolbut5/threadflow/actions/workflows/ci.yml)
 
-[Validation notes](docs/VALIDATION.md) · [Source license](LICENSE)
+![Интерфейс Threadflow](docs/preview.png)
 
-## What it does
+## Возможности
 
-Форма - проверка контактов - категория - обращение в SQLite - локальный outbox. Повтор сбойного шага не создаёт дублей.
+- Входящая форма с именем, email и текстом заявки.
+- Схема из пяти шагов со статусом каждого этапа.
+- Сохранение обращений и результатов выполнения в SQLite.
+- Повтор после сбоя без второго обращения и дублирующего уведомления.
 
-Form - validation - rule classification - SQLite ticket - local notification outbox. Failed steps resume without duplicating tickets.
+## Как устроен проект
 
-Independent portfolio demo, written from scratch. Synthetic examples only. No commercial source, proprietary prompts, client recordings or customer data.
+Результаты шагов сохраняются отдельно. Если отправка уведомления прерывается, повтор продолжает обработку существующего обращения. Для проверки этого поведения в интерфейсе есть управляемый тестовый сбой.
 
-## Run locally
+**Стек:** Python, FastAPI, SQLite, React, TypeScript, React Flow.
 
-Python 3.12, Node 22 and pnpm 11.19.0:
+## Структура
 
-```sh
-python -m venv .venv
-# Windows: .venv\Scripts\activate
-# Linux/macOS: source .venv/bin/activate
-pip install -r requirements.txt
-pnpm install --frozen-lockfile
-pnpm build
-uvicorn backend.app:app --host 127.0.0.1 --port 8000
+```text
+backend/        выполнение шагов, история и защита от повторов
+src/            интерфейс, состояния и работа с API
+public/         иллюстрация персонажа и статические материалы
+tests/          проверки поведения серверной части
+docs/           запуск, проверки и материалы проекта
+Dockerfile      сборка интерфейса и серверного приложения
+compose.yml     локальный запуск с сохранением данных
 ```
 
-Open http://127.0.0.1:8000. For UI development: `pnpm dev` (API proxy expects port 8000).
+## Запуск
+
+Нужны Git и Docker. Каждый проект запускается отдельно на порту 8000.
 
 ```sh
+git clone https://github.com/famelikolbut5/threadflow.git
+cd threadflow
 docker compose up --build
 ```
 
-Local-only binding is deliberate. These demos have no user authentication and are not hardened multi-user hosted services.
+Откройте [localhost:8000](http://localhost:8000). [Запуск без Docker и настройки](docs/RUNNING.md).
 
-## Checks and delivery
+## Состав демоверсии
 
-```sh
-pip install pytest httpx
-pytest -q
-pnpm build
-```
+Уведомления сохраняются в локальной очереди outbox. Сценарий состоит из пяти фиксированных шагов; блоки на холсте можно перемещать для удобства просмотра.
 
-GitHub Actions runs backend checks, TypeScript/build checks and Docker image build. Model credentials are never included in CI or a public image.
-
-## Boundaries
-
-Порядок обработки фиксирован. Холст позволяет перемещать блоки. Внешняя доставка уведомлений не настроена.
-
-The full application runs locally with its Python backend. A static build alone cannot transcribe audio, execute workflows, render video or call Codex.
-
-## Stack and attribution
-
-Python / FastAPI / React / TypeScript / Vite / Motion / Lucide. React Flow powers the editable workflow canvas. Google Fonts: Golos Text (SIL OFL). All third-party dependencies retain their own licenses. See `THIRD_PARTY.md`.
-
-MIT for independently authored source. Asset provenance and actual validation: `docs/VALIDATION.md`.
+[Проверки и результаты](docs/VALIDATION.md) | [Лицензии зависимостей и материалов](THIRD_PARTY.md) | [MIT](LICENSE)

@@ -1,13 +1,20 @@
-# Validation - 2026-10-06
+# Проверки
 
-Windows / Python 3.12 / Node 22 / pnpm 11.19.0. TypeScript checks and production builds passed locally.
-All examples use synthetic data. Local tests do not imply successful hosted CI or quality on real customer data.
+Проверено 6 октября 2026 на Windows: Python 3.12, Node.js 22 и pnpm 11.19.0.
 
-3 tests passed. Covers same-request replay, conflicting idempotency payload, invalid contact, failed notification retry and exactly one ticket/notification after repeated retries. Notifications are local records, not delivered to external systems.
+## Функциональность
 
-Docker image built and started locally as a non-root user. Static UI and health endpoint returned successfully. A container request failed at notification, retry completed it, and the run history contained exactly one run.
+- 3 серверных теста: повтор того же запроса, конфликт содержимого с тем же ключом, неверный контакт и восстановление после сбоя уведомления.
+- После повторных попыток остаются одно обращение и одно уведомление.
+- В браузере проверен успешный запуск пяти шагов и повтор сценария после управляемого сбоя.
+- Очередь уведомлений локальная; отправка во внешний сервис не тестировалась и не заявлена.
 
-## Selected interface verification
+## Сборка и запуск
 
-Final TypeScript/Vite build passed. Browser review at measured 1454 × 818 desktop and 443 px mobile width found no horizontal page overflow. Escape closes project dialogs. `preview.png` is an actual local application screenshot, not a design mockup.
-A real run completed all 5 steps. A separate run failed at notification; retry completed the same ticket TF-613B398D. The canvas represents this sequential pipeline; it does not claim Telegram/Google Sheets integrations.
+- TypeScript и сборка Vite прошли.
+- Команды Docker Compose из README выполнены: контейнер запустился, API health вернул `ok`, интерфейс доступен на порту 8000.
+- GitHub Actions запускает серверные тесты, проверку TypeScript, сборку интерфейса и Docker-образа. Актуальный результат доступен по значку проверок в README.
+
+## Интерфейс
+
+Превью сделаны с работающего приложения. Проверены ширины 1454 и 443 пикселя: горизонтального переполнения страницы нет. В режиме снимка отсутствуют полосы прокрутки.
